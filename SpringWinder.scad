@@ -87,7 +87,9 @@ module winder() {
         0
         ])
       union() {
-      cylinder(r1=10+5, r2=10, h=5, center=true);
+      translate([0,0,10-2]) rotate([180,0,0])
+        cylinder(r1=10+5, r2=10-2, h=7, center=true);
+      cylinder(r1=10+5, r2=10-2, h=7, center=true);
       cylinder(r=10, h=h, center=false);
     }
     }
