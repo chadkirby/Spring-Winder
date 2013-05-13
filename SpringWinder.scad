@@ -48,14 +48,14 @@ module winder_base() {
     translate([len/2,widbase/2,0])
       mandrel_hole();
     // set screw
-    translate([len/2,0,widbase/2])
+    translate([len/2,-0.01,widbase/2])
     rotate([-90,0,0])
-      #cylinder(r=mandrel_setscrew_tap/2, h=widbase/1.5, center=false, $fn=60);
+      #cylinder(r=mandrel_setscrew_tap/2, h=widbase/2, center=false, $fn=12);
     // tang
     translate([len/2 + tang_offset,widbase/2,height-10])
       #cylinder(r=wire_diameter/2+printer_fudge_factor, h=10, center=false, $fn=12);
-    translate([len/2 + tang_offset,widbase/2,height-wire_diameter/2])
-      #cylinder(r2=wire_diameter, r1=wire_diameter/2, h=wire_diameter/2, center=false, $fn=12);
+    translate([len/2 + tang_offset,widbase/2,height-1])
+      #cylinder(r2=1.5, r1=0.5/2, h=1, center=false, $fn=12);
   }
 }
 
