@@ -26,14 +26,14 @@ wire_diameter = 1;
 tang_offset = 6; // from center of mandrel
 printer_fudge_factor = 0.21;
 
-mandrel_setscrew_tap = 3.26; // 8-32
+mandrel_setscrew_tap = 3; // 8-32
 
-translate([-20, 50, height])
+translate([-20, 55, height])
 rotate([180,0,0])
 winder_base();
 winder();
 
-  height=20;
+  height=15;
   len = 40;
   widtop=25;
   widbase = 15;
@@ -48,38 +48,20 @@ module winder_base() {
     translate([len/2,widbase/2,0])
       mandrel_hole();
     // set screw
-    translate([len/2,0,widbase/1.5])
+    translate([len/2,0,widbase/2])
     rotate([-90,0,0])
-      #cylinder(r=mandrel_setscrew_tap/2+printer_fudge_factor, h=widbase, center=false, $fn=60);
+      #cylinder(r=mandrel_setscrew_tap/2, h=widbase/1.5, center=false, $fn=60);
     // tang
     translate([len/2 + tang_offset,widbase/2,height-10])
       #cylinder(r=wire_diameter/2+printer_fudge_factor, h=10, center=false, $fn=12);
-    // for (i = [1 : stepDelta : stepDelta]) {
-    //   assign(
-    //     p1 = [
-    //       len/2 + widtop/2 * cos(30 + i * 360),
-    //       widbase/2 + widtop/2 * sin(30 + i * 360)          
-    //     ],
-    //     p0 = [
-    //       len/2 + widtop/2 * cos(30 + (i-stepDelta) * 360),
-    //       widbase/2 + widtop/2 * sin(30 + (i-stepDelta) * 360)
-    //     ]
-    //   ) {
-    //     translate([0, 0, height - (i-stepDelta) * wire_diameter])
-    //     #linear_extrude(height = wire_diameter)
-    //     polygon([
-    //       [len/2, widbase/2],
-    //       p0, p1
-    //     ]);
-    //   }      
-    // }
-
+    translate([len/2 + tang_offset,widbase/2,height-wire_diameter/2])
+      #cylinder(r2=wire_diameter, r1=wire_diameter/2, h=wire_diameter/2, center=false, $fn=12);
   }
 }
 
 module winder() {
-  r = 25;
-  h=7;
+  r = 30;
+  h=8;
   intersection() {
   difference() {
     union() {
@@ -98,18 +80,21 @@ module winder() {
       cylinder(r1=steel_mandrel_diameter, r2=steel_mandrel_diameter/2+1.26, h=steel_mandrel_diameter/2, center=false);
     }
     mandrel_hole();
-    for (a = [360 : 30 : 30]) {
+    for (a = [360 : 45 : 45]) {
       translate([
-        (r+2.5) * cos(a),
-        (r+2.5) * sin(a),
+        (r+3) * cos(a),
+        (r+3) * sin(a),
         0
         ])
-      cylinder(r=5, h=h, center=false);
+      union() {
+      cylinder(r1=10+5, r2=10, h=5, center=true);
+      cylinder(r=10, h=h, center=false);
+    }
     }
   }
-  translate([0,0,-r+1.5])
+  translate([0,0,-r+2])
     cylinder(r1=0, r2=r*2, h=r*2, center=false);
-  translate([0,0,r+h-1.5])
+  translate([0,0,r+h-2])
     rotate([180,0,0])
       cylinder(r1=0, r2=r*2, h=r*2, center=false);
   }
