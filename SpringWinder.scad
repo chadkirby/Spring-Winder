@@ -23,7 +23,6 @@ function inch(in) = 25.4*in;
 
 steel_mandrel_diameter = inch(3/16);
 wire_diameter = 1;
-tang_offset = 6; // from center of mandrel
 printer_fudge_factor = 0.21;
 
 mandrel_setscrew_tap = 3; // 8-32
@@ -33,7 +32,7 @@ rotate([180,0,0])
 winder_base();
 winder();
 
-  height=15;
+  height=17.5;
   len = 40;
   widtop=25;
   widbase = 15;
@@ -45,18 +44,24 @@ module winder_base() {
       translate([0,-(widtop-widbase)/2,height-5])
     	cube(size=[len, widtop, 5], center=false);
     }
-    translate([len/2,widbase/2,0])
-      mandrel_hole();
-    // set screw
-    translate([len/2,-0.01,widbase/2])
-    rotate([-90,0,0])
-      #cylinder(r=mandrel_setscrew_tap/2, h=widbase/2, center=false, $fn=12);
-    // tang
-    translate([len/2 + tang_offset,widbase/2,height-10])
-      #cylinder(r=wire_diameter/2+printer_fudge_factor, h=10, center=false, $fn=12);
-    translate([len/2 + tang_offset,widbase/2,height-1])
-      #cylinder(r2=1.5, r1=0.5/2, h=1, center=false, $fn=12);
+    translate([len/2,widbase/2,1.5]) mandrel_hole();
+    // split the base to clamp the mandrel
+    translate([0,widbase/2-0.5,0]) cube(size=[len, 1, height-5], center=false);
+    for (offset = [5 : 1 : widtop/2 - 2]) 
+      translate([
+        len/2 + offset * cos(0+45*offset),
+        widbase/2 + offset * sin(0+45*offset),
+        0]) tailHole();
+    translate([0,widbase/2,height-5.1]) rotate([0,71,9]) tailHole(false, 20);
   }
+}
+
+module tailHole(fan = true, len = 10) {
+  translate([0,0,height-len])
+    cylinder(r=wire_diameter/2+printer_fudge_factor, h=len, center=false, $fn=12);
+  if (fan)
+    translate([0,0,height-1])
+      cylinder(r2=1.5, r1=0.5/2, h=1, center=false, $fn=12);
 }
 
 module winder() {
@@ -76,7 +81,7 @@ module winder() {
       }
       translate([0,0,h])
       cylinder(r=steel_mandrel_diameter, h=steel_mandrel_diameter/2, center=false);
-      translate([0,0,h+steel_mandrel_diameter/2])
+      translate([0,0,h+steel_mandrel_diameter/2+0.001])
       cylinder(r1=steel_mandrel_diameter, r2=steel_mandrel_diameter/2+1.26, h=steel_mandrel_diameter/2, center=false);
     }
     mandrel_hole();
