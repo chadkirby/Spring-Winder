@@ -19,9 +19,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-function inch(in) = 25.4*in;
 
-steel_mandrel_diameter = inch(3/16);
+// 3/16"
+steel_mandrel_diameter = 4.7625; 
 wire_diameter = 1;
 printer_fudge_factor = 0.21;
 
@@ -48,18 +48,18 @@ module winder_base() {
     translate([base_length/2,base_width_narrow/2,1.5]) mandrel_hole();
     // split the base to clamp the mandrel
     translate([0,base_width_narrow/2-0.5,0]) cube(size=[base_length, 1, base_height-5], center=false);
-    for (offset = [5 : 1 : base_width/2 - 2]) 
+    for (offset = [5 : 1 : base_width/2 - 4]) 
       translate([
         base_length/2 + offset * cos(0+45*offset),
         base_width_narrow/2 + offset * sin(0+45*offset),
         0]) tailHole();
-    translate([0,base_width_narrow/2,base_height-5.1]) rotate([0,71,9]) tailHole(false, 20);
+    translate([0,base_width_narrow/2,base_height-5.1]) rotate([0,71,9]) tailHole(false, 20, wire_diameter);
   }
 }
 
-module tailHole(fan = true, base_length = 10) {
+module tailHole(fan = true, base_length = 10, r = wire_diameter/2+printer_fudge_factor) {
   translate([0,0,base_height-base_length])
-    cylinder(r=wire_diameter/2+printer_fudge_factor, h=base_length, center=false, $fn=12);
+    cylinder(r=r, h=base_length, center=false, $fn=12);
   if (fan)
     translate([0,0,base_height-1])
       cylinder(r2=1.5, r1=0.5/2, h=1, center=false, $fn=12);
@@ -73,16 +73,24 @@ module winder() {
       translate([0,0,winder_height])
       difference() {
         cylinder(r=base_width/2, h=steel_mandrel_diameter+wire_diameter, center=false);
+
         translate([0,0,steel_mandrel_diameter - wire_diameter*2])
-        cylinder(r=steel_mandrel_diameter + wire_diameter*2, h=steel_mandrel_diameter, center=false);
+          cylinder(r=base_width/2-4, h=steel_mandrel_diameter, center=false);
+
         translate([0,0,steel_mandrel_diameter])
           rotate([90,0,0])
             cylinder(r=wire_diameter*2, h=base_width, center=true, $fn=4);
+
+        translate([0,0,steel_mandrel_diameter])
+          union() {
+              cube([base_width/2, base_width/2, wire_diameter]);
+              rotate([0,0,180]) cube([base_width/2, base_width/2, wire_diameter]);
+            }
       }
       translate([0,0,winder_height])
       cylinder(r=steel_mandrel_diameter, h=steel_mandrel_diameter/2, center=false);
       translate([0,0,winder_height+steel_mandrel_diameter/2+0.001])
-      cylinder(r1=steel_mandrel_diameter + wire_diameter*2, r2=steel_mandrel_diameter/2+1.26, h=steel_mandrel_diameter/2, center=false);
+      cylinder(r1=base_width/2-4, r2=steel_mandrel_diameter/2+1.26, h=steel_mandrel_diameter/2, center=false);
     }
     mandrel_hole();
     // easy edges finger grips
