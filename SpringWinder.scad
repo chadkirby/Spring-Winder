@@ -83,8 +83,8 @@ module winder() {
 
         translate([0,0,steel_mandrel_diameter])
           union() {
-              cube([base_width/2, base_width/2, wire_diameter]);
-              rotate([0,0,180]) cube([base_width/2, base_width/2, wire_diameter]);
+              translate([0,2,0]) cube([base_width/2, base_width/2, wire_diameter]);
+              translate([0,-2,0]) rotate([0,0,-90]) cube([base_width/2, base_width/2, wire_diameter]);
             }
       }
       translate([0,0,winder_height])
