@@ -48,21 +48,23 @@ module winder_base() {
     translate([base_length/2,base_width_narrow/2,1.5]) mandrel_hole();
     // split the base to clamp the mandrel
     translate([0,base_width_narrow/2-0.5,0]) cube(size=[base_length, 1, base_height-5], center=false);
-    for (offset = [5 : 1 : base_width/2 - 4]) 
+    for (offset = [5 : 1 : base_width/2  ]) 
       translate([
-        base_length/2 + offset * cos(0+45*offset),
-        base_width_narrow/2 + offset * sin(0+45*offset),
+        base_length/2 + offset * cos(-150+120*(offset-5)),
+        base_width_narrow/2 + offset * sin(-150+120*(offset-5)),
         0]) tailHole();
-    translate([0,base_width_narrow/2,base_height-5.1]) rotate([0,71,9]) tailHole(false, 20, wire_diameter);
+    translate([0,base_width_narrow/2,base_height-4.8]) rotate([0,71,9]) tailHole(false, 20, wire_diameter);
+    translate([base_length,base_width_narrow/2,base_height-4.8]) rotate([0,71,171]) tailHole(false, 20, wire_diameter);
   }
 }
 
 module tailHole(fan = true, base_length = 10, r = wire_diameter/2+printer_fudge_factor) {
+  fanr = 1.5;
   translate([0,0,base_height-base_length])
     cylinder(r=r, h=base_length, center=false, $fn=12);
   if (fan)
-    translate([0,0,base_height-1])
-      cylinder(r2=1.5, r1=0.5/2, h=1, center=false, $fn=12);
+    translate([0,0,base_height - (fanr - wire_diameter/2)])
+      cylinder(r2=fanr, r1=wire_diameter/2, h=fanr - wire_diameter/2, center=false, $fn=12);
 }
 
 module winder() {
@@ -75,22 +77,26 @@ module winder() {
         cylinder(r=base_width/2, h=steel_mandrel_diameter+wire_diameter, center=false);
 
         translate([0,0,steel_mandrel_diameter - wire_diameter*2])
-          cylinder(r=base_width/2-4, h=steel_mandrel_diameter, center=false);
+          cylinder(r=steel_mandrel_diameter+wire_diameter*1, h=steel_mandrel_diameter, center=false);
 
-        translate([0,0,steel_mandrel_diameter])
+        translate([0,base_width/4,steel_mandrel_diameter])
           rotate([90,0,0])
-            cylinder(r=wire_diameter*2, h=base_width, center=true, $fn=4);
+            cylinder(r1=wire_diameter*2, r2 = steel_mandrel_diameter/2 + wire_diameter, h=base_width/2, center=true, $fn=4);
+          rotate([0,0,-90])
+        translate([0,-base_width/4,steel_mandrel_diameter])
+          rotate([-90,0,0])
+            cylinder(r1=wire_diameter*2, r2 = steel_mandrel_diameter/2 + wire_diameter, h=base_width/2, center=true, $fn=4);
 
-        translate([0,0,steel_mandrel_diameter])
+        translate([0,0,steel_mandrel_diameter - wire_diameter])
           union() {
-              translate([0,2,0]) cube([base_width/2, base_width/2, wire_diameter]);
-              translate([0,-2,0]) rotate([0,0,-90]) cube([base_width/2, base_width/2, wire_diameter]);
+              translate([0,0,0]) cube([base_width/2, base_width/2, wire_diameter*2]);
+              translate([base_width/2,0.1,0]) rotate([0,0,-180]) cube([base_width, base_width/2+0.1, wire_diameter*2]);
             }
       }
-      translate([0,0,winder_height])
-      cylinder(r=steel_mandrel_diameter, h=steel_mandrel_diameter/2, center=false);
+      //translate([0,0,winder_height])
+        //cylinder(r=steel_mandrel_diameter, h=steel_mandrel_diameter/2, center=false);
       translate([0,0,winder_height+steel_mandrel_diameter/2+0.001])
-      cylinder(r1=base_width/2-4, r2=steel_mandrel_diameter/2+1.26, h=steel_mandrel_diameter/2, center=false);
+        cylinder(r1=steel_mandrel_diameter+wire_diameter*1, r2=steel_mandrel_diameter/2+1.26, h=steel_mandrel_diameter/2, center=false);
     }
     mandrel_hole();
     // easy edges finger grips
